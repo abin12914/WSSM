@@ -42,17 +42,11 @@ $(function () {
     $(".product").select2();
 
     //show quantity options for explosive purchase only
-    $('body').on("change", "#product", function () {
-        var productId = $('#product').val();
-        if(productId == 2) {
-            $('#explosive_quantity_cap').prop('disabled',false);
-            $('#explosive_quantity_gel').prop('disabled',false);
-            $('#explosive_quantity_div').show();
-        } else {
-            $('#explosive_quantity_cap').prop('disabled',true);
-            $('#explosive_quantity_gel').prop('disabled',true);
-            $('#explosive_quantity_div').hide();
-        }
+    $('body').on("change", "#product_id_1", function () {
+        $("#bill_body").append(
+            $("#bill_body").find("#product_row_1").clone()
+            .removeAttr("id").find("input").val("").end()
+        );
     });
 
     //show supplier options for cash transaction only

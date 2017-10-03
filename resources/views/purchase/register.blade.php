@@ -105,13 +105,14 @@
                                         <th style="width: 28%">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr class="product_row">
+                                <tbody id="bill_body">
+                                    <tr class="product_row" id="product_row_1">
                                         <td>
                                             1
+                                            <input type="hidden" name="index" value="1">
                                         </td>
                                         <td>
-                                            <select name="product_id[1]" class="form-control product" style="width: 100%">
+                                            <select name="product_id[]" class="form-control product" id="product_id_1" style="width: 100%">
                                                 <option value="">Select product</option>
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}">{{ $product->name }}</option>
@@ -119,16 +120,16 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input name="quantity[1]" type="text" style="width: 100%; height: 35px;">
+                                            <input name="quantity[]" type="text" style="width: 100%; height: 35px;">
                                         </td>
                                         <td>
                                             <input id="measure_unit" type="text" disabled style="width: 100%; height: 35px;">
                                         </td>
                                         <td>
-                                            <input name="rate[1]" type="text" style="width: 100%; height: 35px;">
+                                            <input name="rate[]" type="text" style="width: 100%; height: 35px;">
                                         </td>
                                         <td>
-                                            <input name="sub_total[1]" type="text" style="width: 100%; height: 35px;">
+                                            <input name="sub_total[]" type="text" style="width: 100%; height: 35px;">
                                         </td>
                                     </tr>
                                 </tbody>
@@ -215,5 +216,5 @@
 </div>
 @endsection
 @section('scripts')
-    <script src="/js/registration/saleRegistration.js?rndstr={{ rand(1000,9999) }}"></script>
+    <script src="/js/registration/purchaseRegistration.js?rndstr={{ rand(1000,9999) }}"></script>
 @endsection
