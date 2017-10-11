@@ -73,6 +73,8 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::get('/purchase/register', 'PurchaseController@register')->name('purchase-register');
         Route::post('/purchase/register/action', 'PurchaseController@registerAction')->name('purchase-register-action');
         Route::get('/purchase/list', 'PurchaseController@list')->name('purchase-list');
+        Route::post('/purchase/detail/add', 'PurchaseController@addPurchaseDetail')->name('purchase-deatail-add');
+        Route::post('/purchase/detail/delete', 'PurchaseController@deletePurchaseDetail')->name('purchase-deatail-delete');
 
         //product category
         Route::get('/product-category/register', 'ProductCategoryController@register')->name('product-category-register');

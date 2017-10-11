@@ -26,21 +26,12 @@ class PurchaseRegistrationRequest extends FormRequest
     public function messages()
     {
         return [
-            'transaction_type.integer'              => "Something went wrong. Please try again after reloading the page.",
-            'transaction_type.in'                   => "Something went wrong. Please try again after reloading the page.",
-            'supplier_account_id.required_if'       => "The supplier field is required.",
+            'supplier_account_id.required'          => "The supplier field is required.",
             'supplier_account_id.integer'           => "Something went wrong. Please try again after reloading the page.",
             'supplier_account_id.in'                => "Something went wrong. Please try again after reloading the page.",
             'date.date_format'                      => "Something went wrong. Please try again after reloading the page.",
+            'date.max'                              => "Something went wrong. Please try again after reloading the page.",
             'time.max'                              => "Something went wrong. Please try again after reloading the page.",
-            'product_id.required'                   => "The product field is required.",
-            'product_id.integer'                    => "Something went wrong. Please try again after reloading the page.",
-            'product_id.in'                         => "Something went wrong. Please try again after reloading the page.",
-            'explosive_quantity_cap.required_if'    => "The no of cap is required.",
-            'explosive_quantity_cap.integer'        => "Invalid data.",
-            'explosive_quantity_gel.required_if'    => "The no of gel is required.",
-            'explosive_quantity_gel.integer'        => "Invalid data.",
-            'bill_no.integer'                       => "Bill number should be an integer",
         ];
     }
 
@@ -53,7 +44,7 @@ class PurchaseRegistrationRequest extends FormRequest
     {
         return [
             'supplier_account_id'       => [
-                                                'required_if:transaction_type,1',
+                                                'required',
                                                 'integer',
                                                 Rule::in(Account::pluck('id')->toArray()),
                                             ],
@@ -73,13 +64,13 @@ class PurchaseRegistrationRequest extends FormRequest
             'bill_amount'               => [    
                                                 'required',
                                                 'numeric',
-                                                'max:99999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
             'tax_amount'                  => [
                                                 'required',
                                                 'numeric',
-                                                'max:9999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
             'discount'                  => [
@@ -91,30 +82,7 @@ class PurchaseRegistrationRequest extends FormRequest
             'deducted_total'            => [
                                                 'required',
                                                 'numeric',
-                                                'max:99999',
-                                                'min:0'
-                                            ],
-            'product_id.*'              => [
-                                                'required',
-                                                'integer',
-                                                Rule::in(Product::pluck('id')->toArray()),
-                                            ],
-            'quantity.*'                => [
-                                                'required',
-                                                'integer',
-                                                'max:2000',
-                                                'min:0'
-                                            ],
-            'rate.*'                    => [
-                                                'required',
-                                                'numeric',
-                                                'max:9999',
-                                                'min:0'
-                                            ],
-            'deducted_total.*'          => [
-                                                'required',
-                                                'numeric',
-                                                'max:99999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
         ];

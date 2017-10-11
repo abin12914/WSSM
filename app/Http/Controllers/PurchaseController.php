@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Account;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\PurchaseDetailTemp;
 use App\Models\Transaction;
 use Auth;
 use DateTime;
@@ -18,16 +19,20 @@ class PurchaseController extends Controller
      */
     public function register()
     {
-        $accounts       = Account::where('type','personal')->get();
+        $accounts       = Account::where('type',3)->get();
         $cashAccount    = Account::find(1);
         $accounts->push($cashAccount); //attaching cash account to the accounts
         $products       = Product::get();
+        $purchasedetailTemp = PurchaseDetailTemp::where('status', 1)->get();
+        $totalBill  = PurchaseDetailTemp::where('status', 1)->sum('total');
         $purchases      = Purchase::with(['transaction.creditAccount'])->orderBy('created_at', 'desc')->take(5)->get();
 
         return view('purchase.register',[
-                'accounts'      => $accounts,
-                'products'      => $products,
-                'purchases'     => $purchases,
+                'accounts'              => $accounts,
+                'products'              => $products,
+                'purchasedetailTemp'    => $purchasedetailTemp,
+                'purchases'             => $purchases,
+                'totalBill'             => $totalBill
             ]);
     }
 
@@ -45,11 +50,6 @@ class PurchaseController extends Controller
         $discount           = $request->get('discount');
         $deductedTotal      = $request->get('deducted_total');
 
-        $productId          = $request->get('product_id');
-        $quantity           = $request->get('quantity');
-        $rate               = $request->get('rate');
-        $subTotal           = $request->get('sub_total');
-
         $purchaseAccount = Account::where('account_name','Purchases')->first();
         if($purchaseAccount) {
             $purchaseAccountId = $purchaseAccount->id;
@@ -64,9 +64,13 @@ class PurchaseController extends Controller
             return redirect()->back()->withInput()->with("message","Failed to save the purchase details. Try again after reloading the page!<small class='pull-right'> #06/02</small>")->with("alert-class","alert-danger");
         }
 
-        /*if(($quantity * $rate) != $billAmount) {
+        $totalBill  = PurchaseDetailTemp::where('status', 1)->sum('total');
+        if(empty($totalBill) || $totalBill == 0) {
+            return redirect()->back()->withInput()->with("message","Failed to save the purchase details. Minimum one product should be added to the bill!<small class='pull-right'> #06/03</small>")->with("alert-class","alert-danger");
+        }
+        if($billAmount != $totalBill) {
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Calculation Error. Try again after reloading the page!<small class='pull-right'> #06/03</small>")->with("alert-class","alert-danger");
-        }*/
+        }
         if(($billAmount + $taxAmount - $discount) != $deductedTotal) {
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Calculation Error. Try again after reloading the page!<small class='pull-right'> #06/04</small>")->with("alert-class","alert-danger");
         }
@@ -92,15 +96,20 @@ class PurchaseController extends Controller
             $purchase->status           = 1;
             
             if($purchase->save()) {
-                foreach ($productId as $key => $id) {
-                    $purchaseDetailArray[$id] = [
-                            'quantity'      => $quantity[$key],
-                            'rate'          => $rate[$key],
-                            'total'     => $subTotal[$key],
+                $purchasedetailTemp = PurchaseDetailTemp::where('status', 1)->get();
+
+                foreach ($purchasedetailTemp as $key => $detail) {
+                    $purchaseDetailArray[$key] = [
+                            'purchase_id'   => $purchase->id,
+                            'product_id'    => $detail->product_id,
+                            'quantity'      => $detail->quantity,
+                            'rate'          => $detail->rate,
+                            'total'         => $detail->total,
                             'status'        => 1,
                         ];
                 }
                 if($purchase->products()->sync($purchaseDetailArray)) {
+                    PurchaseDetailTemp::truncate();
                     return redirect()->back()->with("message","Successfully saved.")->with("alert-class","alert-success");
                 } else {
                     $purchase->delete();
@@ -149,18 +158,6 @@ class PurchaseController extends Controller
             $query = $query->where('product_id', $productId);
         }
 
-        /*if(!empty($fromDate)) {
-            $searchFromDate = new DateTime($fromDate);
-            $searchFromDate = $searchFromDate->format('Y-m-d');
-            $query = $query->where('date_time', '>=', $searchFromDate);
-        }
-
-        if(!empty($toDate)) {
-            $searchToDate = new DateTime($toDate." 23:59");
-            $searchToDate = $searchToDate->format('Y-m-d H:i');
-            $query = $query->where('date_time', '<=', $searchToDate);
-        }*/
-
         $totalQuery     = clone $query;
         $totalAmount    = $totalQuery->sum('total');
 
@@ -176,5 +173,93 @@ class PurchaseController extends Controller
                 'toDate'                => $toDate,
                 'totalAmount'           => $totalAmount
             ]);
+    }
+
+    public function addPurchaseDetail(Request $request) {
+        $productId  = $request->get('product_id');
+        $quantity   = $request->get('quantity');
+        $rate       = $request->get('rate');
+        $total      = $request->get('total');
+
+        $purchasedetailTemp = new PurchaseDetailTemp();
+        $purchasedetailTemp->product_id = $productId;
+        $purchasedetailTemp->quantity   = $quantity;
+        $purchasedetailTemp->rate       = $rate;
+        $purchasedetailTemp->total      = $total;
+        $purchasedetailTemp->status     = 1;
+        if($purchasedetailTemp->save()) {
+            $count      = PurchaseDetailTemp::where('status', 1)->count();
+            $totalBill  = PurchaseDetailTemp::where('status', 1)->sum('total');
+            if(empty($count)) {
+                $count = 0;
+            }
+            if(empty($totalBill)) {
+                $totalBill = 0;
+            }
+            $product    = Product::find($productId);
+            if(!empty($product) && !empty($product->id)) {
+                $productName    = $product->name;
+                $measureUnit    = $product->measureUnit->name;
+            } else {
+                return([
+                'flag'  => false,
+                ]);
+            }
+
+            $html = '<tr id="product_row_'.$purchasedetailTemp->id.'">'.
+                        '<td>'.($count).'</td>'.
+                        '<td id="td_product_id_'.($count).'">'.
+                            '<label class="form-control">'.$productName.'</label>'.
+                        '<td>'.
+                            '<input id="quantity_'.($count).'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'.$quantity.'">'.
+                        '</td>'.
+                        '<td>'.
+                            '<input id="measure_unit_'.($count).'" class="form-control" type="text" readonly style="width: 100%; height: 35px;" value="'.$measureUnit.'">'.
+                        '</td>'.
+                        '<td>'.
+                            '<input id="rate'.($count).'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'.$rate.'">'.
+                        '</td>'.
+                        '<td>'.
+                            '<input id="sub_total'.($count).'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'.$total.'">'.
+                        '</td>'.
+                        '<td class="no-print">'.
+                            '<button data-detail-id="'. $purchasedetailTemp->id .'" id="remove_button_'.($count).'" type="button" class="form-control remove_button">'.
+                                '<i style="color: red;" class="fa fa-close"></i>'.
+                            '</button>'.
+                        '</td>'.
+                    '</tr>';
+            return([
+                'flag'      => true,
+                'data'      => $html,
+                'totalBill' => $totalBill,
+                ]);
+        } else {
+            return([
+                'flag'  => false,
+                ]);
+        }
+    }
+
+    public function deletePurchaseDetail(Request $request) {
+        $id = $request->get('id');
+        $purchaseDetail = PurchaseDetailTemp::find($id);
+        if(!empty($purchaseDetail)) {
+            $amount = $purchaseDetail->total;
+        } else {
+            return([
+                    'flag' => false
+                ]);
+        }
+
+        if($purchaseDetail->delete()) {
+            return([
+                    'flag'      => true,
+                    'amount'    => $amount
+                ]);
+        } else {
+            return([
+                    'flag' => false
+                ]);
+        }
     }
 }

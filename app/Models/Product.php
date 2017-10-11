@@ -15,6 +15,14 @@ class Product extends Model
     }
 
     /**
+     * Get the measure unit details related to the product
+     */
+    public function measureUnit()
+    {
+        return $this->belongsTo('App\Models\MeasureUnit', 'measure_unit_id');
+    }
+
+    /**
      * The products that belong to the purchase
      */
     public function purchases()
