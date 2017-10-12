@@ -256,13 +256,13 @@ class PurchaseController extends Controller
     }
 
     public function viewInvoice($invoiceId) {
-        $purchases = Purchase::where('id', $invoiceId)->where('status', 1)->first();
+        $purchase = Purchase::where('id', $invoiceId)->where('status', 1)->first();
 
-        if(empty($purchases)) {
+        if(empty($purchase)) {
             return redirect()->back()->withInput()->with("message","Invoice not found. Try again after reloading the page!<small class='pull-right'> #13/01</small>")->with("alert-class","alert-danger");
         }
-        return view('purchase.Invoice',[
-                'purchases'             => $purchases,
+        return view('purchase.invoice',[
+                'purchase'             => $purchase,
             ]);
     }
 }

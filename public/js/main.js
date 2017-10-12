@@ -16,6 +16,10 @@ $(function () {
     $('body').on("keydown", ".prevent-edit", function (evt) {
         return false;
     });
+
+    $('body').on("click", "#print_invoice", function (evt) {
+        window.print();
+    });
     
     // for checking if the pressed key is a number
     $('body').on("keypress", ".number_only", function (evt) {
