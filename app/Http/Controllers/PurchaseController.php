@@ -137,14 +137,12 @@ class PurchaseController extends Controller
         $accountId      = !empty($request->get('account_id')) ? $request->get('account_id') : 0;
         $fromDate       = !empty($request->get('from_date')) ? $request->get('from_date') : '';
         $toDate         = !empty($request->get('to_date')) ? $request->get('to_date') : '';
-        $productId      = !empty($request->get('product_id')) ? $request->get('product_id') : 0;
 
-        $accounts       = Account::where('type', 'personal')->where('status', '1')->get();
+        $accounts       = Account::where('type', 3)->where('status', '1')->get();
         $cashAccount    = Account::find(1);
         if(!empty($cashAccount) && count($cashAccount) == 1) {
             $accounts->push($cashAccount); //attaching cash account to the accounts
         }
-        $products       = Product::where('status', '1')->get();
 
         $query = Purchase::where('status', 1);
 
@@ -154,10 +152,6 @@ class PurchaseController extends Controller
             });
         }
 
-        if(!empty($productId) && $productId != 0) {
-            $query = $query->where('product_id', $productId);
-        }
-
         $totalQuery     = clone $query;
         $totalAmount    = $totalQuery->sum('total');
 
@@ -165,10 +159,8 @@ class PurchaseController extends Controller
         
         return view('purchase.list',[
                 'accounts'              => $accounts,
-                'products'              => $products,
                 'purchases'             => $purchases,
                 'accountId'             => $accountId,
-                'productId'             => $productId,
                 'fromDate'              => $fromDate,
                 'toDate'                => $toDate,
                 'totalAmount'           => $totalAmount
@@ -261,5 +253,16 @@ class PurchaseController extends Controller
                     'flag' => false
                 ]);
         }
+    }
+
+    public function viewInvoice($invoiceId) {
+        $purchases = Purchase::where('id', $invoiceId)->where('status', 1)->first();
+
+        if(empty($purchases)) {
+            return redirect()->back()->withInput()->with("message","Invoice not found. Try again after reloading the page!<small class='pull-right'> #13/01</small>")->with("alert-class","alert-danger");
+        }
+        return view('purchase.Invoice',[
+                'purchases'             => $purchases,
+            ]);
     }
 }

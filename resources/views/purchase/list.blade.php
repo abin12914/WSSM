@@ -36,21 +36,7 @@
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10">
                                     <div class="form-group">
-                                        <div class="col-sm-6 {{ !empty($errors->first('product_id')) ? 'has-error' : '' }}">
-                                            <label for="product_id" class="control-label">Product : </label>
-                                            <select class="form-control" name="product_id" id="product_id" tabindex="3" style="width: 100%">
-                                                @if(!empty($products) && (count($products) > 0))
-                                                    <option value="">Select product</option>
-                                                    @foreach($products as $product)
-                                                        <option value="{{ $product->id }}" {{ ((old('product_id') == $product->id ) || $productId == $product->id) ? 'selected' : '' }}>{{ $product->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            @if(!empty($errors->first('product')))
-                                                <p style="color: red;" >{{$errors->first('product')}}</p>
-                                            @endif
-                                        </div>
-                                        <div class="col-sm-6     {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
+                                        <div class="col-sm-4     {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
                                             <label for="account_id" class="control-label">Supplier : </label>
                                             <select class="form-control" name="account_id" id="account_id" tabindex="3" style="width: 100%">
                                                 @if(!empty($accounts) && (count($accounts) > 0))
@@ -64,16 +50,14 @@
                                                 <p style="color: red;" >{{$errors->first('account_id')}}</p>
                                             @endif
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-6 {{ !empty($errors->first('from_date')) ? 'has-error' : '' }}">
+                                        <div class="col-sm-4 {{ !empty($errors->first('from_date')) ? 'has-error' : '' }}">
                                             <label for="from_date" class="control-label">Start Date : </label>
                                             <input type="text" class="form-control decimal_number_only datepicker" name="from_date" id="from_date" placeholder="Date" value="{{ !empty($fromDate) ? $fromDate : old('from_date') }}" tabindex="1">
                                             @if(!empty($errors->first('from_date')))
                                                 <p style="color: red;" >{{$errors->first('from_date')}}</p>
                                             @endif
                                         </div>
-                                        <div class="col-sm-6 {{ !empty($errors->first('to_date')) ? 'has-error' : '' }}">
+                                        <div class="col-sm-4 {{ !empty($errors->first('to_date')) ? 'has-error' : '' }}">
                                             <label for="to_date" class="control-label">End Date : </label>
                                             <input type="text" class="form-control decimal_number_only datepicker" name="to_date" id="to_date" placeholder="Date" value="{{ !empty($toDate) ? $toDate : old('to_date') }}" tabindex="1">
                                             @if(!empty($errors->first('to_date')))
@@ -110,10 +94,10 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Date & Time</th>
-                                            {{-- <th>Product</th> --}}
                                             <th>Supplier</th>
                                             <th>Description</th>
                                             <th>Bill Amount</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -121,11 +105,11 @@
                                             @foreach($purchases as $index=>$purchase)
                                                 <tr>
                                                     <td>{{ $index + $purchases->firstItem() }}</td>
-                                                    <td>{{ $purchase->id }}</td>
-                                                    {{-- <td>{{ $purchase->purchasebleProduct->name }}</td> --}}
+                                                    <td>{{ $purchase->transaction->date_time }}</td>
                                                     <td>{{ $purchase->transaction->creditAccount->account_name }}</td>
                                                     <td>{{ $purchase->transaction->particulars }}</td>
                                                     <td>{{ $purchase->total }}</td>
+                                                    <td><a href="{{ route('purchase-invoice', [$purchase->id]) }}">View Bill</a></td>
                                                 </tr>
                                             @endforeach
                                         @endif
@@ -137,16 +121,16 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                {{-- <td></td> --}}
+                                                <td></td>
                                                 <td></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
-                                                {{-- <td></td> --}}
                                                 <td></td>
                                                 <td><b>Total Amount</b></td>
                                                 <td></td>
                                                 <td><b>{{ $totalAmount }}</b></td>
+                                                <td>#</td>
                                             </tr>
                                         </tfoot>
                                     @endif
