@@ -68,6 +68,9 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::post('/sale/register/action', 'SaleController@registerAction')->name('sale-register-action');
         Route::get('/sale/bill/print/{id}', 'SaleController@saleBillPrint')->name('sale-bill-print');
         Route::get('/sale/list', 'SaleController@list')->name('sale-list');
+        Route::post('/sale/detail/add', 'SaleController@addSaleDetail')->name('sale-deatail-add');
+        Route::post('/sale/detail/delete', 'SaleController@deleteSaleDetail')->name('sale-deatail-delete');
+        Route::get('/sale/view/invoice/{id}', 'SaleController@viewInvoice')->name('sale-invoice');
 
         //purchases
         Route::get('/purchase/register', 'PurchaseController@register')->name('purchase-register');

@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Account;
-use App\Models\Product;
 
 class SaleRegistrationRequest extends FormRequest
 {
@@ -20,6 +19,22 @@ class SaleRegistrationRequest extends FormRequest
     }
 
     /**
+     * Customized error messages
+     *
+     */
+    public function messages()
+    {
+        return [
+            'customer_account_id.required'          => "The supplier field is required.",
+            'customer_account_id.integer'           => "Something went wrong. Please try again after reloading the page.",
+            'customer_account_id.in'                => "Something went wrong. Please try again after reloading the page.",
+            'date.date_format'                      => "Something went wrong. Please try again after reloading the page.",
+            'date.max'                              => "Something went wrong. Please try again after reloading the page.",
+            'time.max'                              => "Something went wrong. Please try again after reloading the page.",
+        ];
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -27,8 +42,8 @@ class SaleRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            'supplier_account_id'       => [
-                                                'required_if:transaction_type,1',
+            'customer_account_id'       => [
+                                                'required',
                                                 'integer',
                                                 Rule::in(Account::pluck('id')->toArray()),
                                             ],
@@ -48,13 +63,13 @@ class SaleRegistrationRequest extends FormRequest
             'bill_amount'               => [    
                                                 'required',
                                                 'numeric',
-                                                'max:99999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
             'tax_amount'                  => [
                                                 'required',
                                                 'numeric',
-                                                'max:9999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
             'discount'                  => [
@@ -66,30 +81,7 @@ class SaleRegistrationRequest extends FormRequest
             'deducted_total'            => [
                                                 'required',
                                                 'numeric',
-                                                'max:99999',
-                                                'min:0'
-                                            ],
-            'product_id.*'              => [
-                                                'required',
-                                                'integer',
-                                                Rule::in(Product::pluck('id')->toArray()),
-                                            ],
-            'quantity.*'                => [
-                                                'required',
-                                                'integer',
-                                                'max:2000',
-                                                'min:0'
-                                            ],
-            'rate.*'                    => [
-                                                'required',
-                                                'numeric',
-                                                'max:9999',
-                                                'min:0'
-                                            ],
-            'deducted_total.*'          => [
-                                                'required',
-                                                'numeric',
-                                                'max:99999',
+                                                'max:999999',
                                                 'min:0'
                                             ],
         ];

@@ -86,7 +86,7 @@
                         </li>
                     </ul>
                 </li>
-                {{-- <li class="treeview {{ Request::is('voucher/*')? 'active' : '' }}">
+                <li class="treeview {{ Request::is('voucher/*')? 'active' : '' }}">
                     <a href="#">
                         <i class="fa fa-tags"></i>
                         <span>Vouchers</span>
@@ -128,7 +128,7 @@
                         </li>
                     </ul>
 
-                </li> --}}
+                </li>
                 <li class="treeview {{ Request::is('account/*')? 'active' : '' }}">
                     <a href="#">
                         <i class="fa fa-book"></i>

@@ -36,7 +36,7 @@
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10">
                                     <div class="form-group">
-                                        <div class="col-sm-4     {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
+                                        <div class="col-sm-4 {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
                                             <label for="account_id" class="control-label">Supplier : </label>
                                             <select class="form-control" name="account_id" id="account_id" tabindex="3" style="width: 100%">
                                                 @if(!empty($accounts) && (count($accounts) > 0))

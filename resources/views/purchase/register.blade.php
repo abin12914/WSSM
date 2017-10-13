@@ -208,7 +208,7 @@
                                         <td></td>
                                         <td></td>
                                         <td><b>Total</b></td>
-                                        <td><input name="deducted_total" id="deducted_total" type="text" class="form-control no-print" value="{{ $totalBill }}" style="width: 100%; height: 35px;"></td>
+                                        <td><input name="deducted_total" id="deducted_total" type="text" class="form-control no-print" value="{{ $totalBill }}" readonly style="width: 100%; height: 35px;"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
                                 </tfoot>

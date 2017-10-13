@@ -4,7 +4,8 @@
 <div class="content-wrapper">
      <section class="content-header">
         <h1>
-            Sale<small>List</small>
+            Sale
+            <small>List</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="{{ route('dashboard') }}"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -35,11 +36,11 @@
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10">
                                     <div class="form-group">
-                                        <div class="col-sm-4     {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
-                                            <label for="account_id" class="control-label">Purchaser : </label>
+                                        <div class="col-sm-4 {{ !empty($errors->first('account_id')) ? 'has-error' : '' }}">
+                                            <label for="account_id" class="control-label">Customer : </label>
                                             <select class="form-control" name="account_id" id="account_id" tabindex="3" style="width: 100%">
                                                 @if(!empty($accounts) && (count($accounts) > 0))
-                                                    <option value="">Select purchaser account</option>
+                                                    <option value="">Select customer account</option>
                                                     @foreach($accounts as $account)
                                                         <option value="{{ $account->id }}" {{ ((old('account_id') == $account->id ) || $accountId == $account->id) ? 'selected' : '' }}>{{ $account->account_name }}</option>
                                                     @endforeach
@@ -61,50 +62,6 @@
                                             <input type="text" class="form-control decimal_number_only datepicker" name="to_date" id="to_date" placeholder="Date" value="{{ !empty($toDate) ? $toDate : old('to_date') }}" tabindex="1">
                                             @if(!empty($errors->first('to_date')))
                                                 <p style="color: red;" >{{$errors->first('to_date')}}</p>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-sm-4     {{ !empty($errors->first('vehicle_id')) ? 'has-error' : '' }}">
-                                            <label for="vehicle_id" class="control-label">Truck Number : </label>
-                                            <select class="form-control" name="vehicle_id" id="vehicle_id" tabindex="3" style="width: 100%">
-                                                @if(!empty($vehicles) && (count($vehicles) > 0))
-                                                    <option value="">Select truck</option>
-                                                    @foreach($vehicles as $vehicle)
-                                                        <option value="{{ $vehicle->id }}" {{ ((old('vehicle_id') == $vehicle->id ) || $vehicleId == $vehicle->id) ? 'selected' : '' }}>{{ $vehicle->reg_number }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            @if(!empty($errors->first('vehicle_id')))
-                                                <p style="color: red;" >{{$errors->first('vehicle_id')}}</p>
-                                            @endif
-                                        </div>
-                                        <div class="col-sm-4 {{ !empty($errors->first('product_id')) ? 'has-error' : '' }}">
-                                            <label for="product_id" class="control-label">Product : </label>
-                                            <select class="form-control" name="product_id" id="product_id" tabindex="3" style="width: 100%">
-                                                @if(!empty($products) && (count($products) > 0))
-                                                    <option value="">Select product</option>
-                                                    @foreach($products as $product)
-                                                        <option value="{{ $product->id }}" {{ ((old('product_id') == $product->id ) || $productId == $product->id) ? 'selected' : '' }}>{{ $product->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            @if(!empty($errors->first('product')))
-                                                <p style="color: red;" >{{$errors->first('product')}}</p>
-                                            @endif
-                                        </div>
-                                        <div class="col-sm-4 {{ !empty($errors->first('vehicle_type_id')) ? 'has-error' : '' }}">
-                                            <label for="vehicle_type_id" class="control-label">Truck Type : </label>
-                                            <select class="form-control" name="vehicle_type_id" id="vehicle_type_id" tabindex="3" style="width: 100%">
-                                                @if(!empty($vehicleTypes) && (count($vehicleTypes) > 0))
-                                                    <option value="">Select vehicle type</option>
-                                                    @foreach($vehicleTypes as $vehicleType)
-                                                        <option value="{{ $vehicleType->id }}" {{ ((old('vehicle_type_id') == $vehicleType->id ) || $vehicleTypeId == $vehicleType->id) ? 'selected' : '' }}>{{ $vehicleType->name }}</option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                            @if(!empty($errors->first('vehicle_type_id')))
-                                                <p style="color: red;" >{{$errors->first('vehicle_type_id')}}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -137,8 +94,10 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Date & Time</th>
-                                            <th>Purchaser</th>
+                                            <th>Customer</th>
+                                            <th>Description</th>
                                             <th>Bill Amount</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -146,9 +105,11 @@
                                             @foreach($sales as $index=>$sale)
                                                 <tr>
                                                     <td>{{ $index + $sales->firstItem() }}</td>
-                                                    <td>{{ $sale->id }}</td>
-                                                    <td>{{ $sale->transaction->debitAccount->account_name }}</td>
+                                                    <td>{{ $sale->transaction->date_time }}</td>
+                                                    <td>{{ $sale->transaction->creditAccount->account_name }}</td>
+                                                    <td>{{ $sale->transaction->particulars }}</td>
                                                     <td>{{ $sale->total }}</td>
+                                                    <td><a href="{{ route('sale-invoice', [$sale->id]) }}">View Bill</a></td>
                                                 </tr>
                                             @endforeach
                                         @endif
@@ -156,13 +117,20 @@
                                     @if(!empty($sales) && (Request::get('page') == $sales->lastPage() || $sales->lastPage() == 1))
                                         <tfoot>
                                             <tr>
-                                                <td></td><td></td><td></td><td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
                                                 <td></td>
                                                 <td><b>Total Amount</b></td>
+                                                <td></td>
                                                 <td><b>{{ $totalAmount }}</b></td>
+                                                <td>#</td>
                                             </tr>
                                         </tfoot>
                                     @endif

@@ -27,10 +27,10 @@ class AccountRegistrationRequest extends FormRequest
             'account_name.unique'       => 'The account name has already been taken by an existing account. Please verify your entry or use initials.',
             'account_type.*'            => 'Something went wrong. Please try again after reloading the page',
             'financial_status.in'       => 'Something went wrong. Please try again after reloading the page',
-            'opening_balance.required'  => 'The opeing balance field is required.'
-            'opening_balance.numeric'   => 'Invalid data.'
-            'opening_balance.min'       => 'Minimum value expected.'
-            'opening_balance.max'       => 'Value limited to 9999999.'
+            'opening_balance.required'  => 'The opeing balance field is required.',
+            'opening_balance.numeric'   => 'Invalid data.',
+            'opening_balance.min'       => 'Minimum value expected.',
+            'opening_balance.max'       => 'Value limited to 9999999.',
             'name.required'             => 'The name field is required for personal accounts.',
             'phone.unique'              => 'The phone number has already been taken by an existing account. Please verify your entry or check for duplicates.',
             'relation_type.required'    => 'The relation type is required for personal accounts.',

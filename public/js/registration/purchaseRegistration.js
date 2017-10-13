@@ -220,16 +220,17 @@ function calculateTotalBill() {
     totalBill       = $('#bill_amount').val()
     tax             = $('#tax_amount').val();
     discount        = $('#discount').val();
-    deductedTotal   = 0;
 
     if(discount != 0 && discount.charAt(discount.length-1) != '.') {
         //for removing the preceding zero
         discount = discount * 1;
     }
     if(totalBill && totalBill >= 1 && totalBill > discount) {
+        deductedTotal   = 0;
         deductedTotal  = (((totalBill * 1) + (tax * 1)) - discount);
         $('#discount').val(discount);
     } else {
+        deductedTotal  = (((totalBill * 1) + (tax * 1)));
         $('#discount').val('0');        
     }
 
