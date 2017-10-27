@@ -23,17 +23,11 @@ class SaleController extends Controller
         $accounts       = Account::where('type', 3)->get();
         $cashAccount    = Account::find(1);
         $accounts->push($cashAccount); //attaching cash account to the accounts
-        $products       = Product::get();
-        $saleDetailTemp = SaleDetailTemp::where('status', 1)->get();
-        $totalBill      = SaleDetailTemp::where('status', 1)->sum('total');
-        $sales          = Sale::with(['transaction.debitAccount'])->orderBy('created_at', 'desc')->take(5)->get();
+        $products       = Product::get();        
 
         return view('sale.register',[
                 'accounts'          => $accounts,
                 'products'          => $products,
-                'saleDetailTemp'    => $saleDetailTemp,
-                'saleDetailTemp'    => $saleDetailTemp,
-                'totalBill'         => $totalBill
             ]);
     }
 
@@ -50,6 +44,10 @@ class SaleController extends Controller
         $taxAmount          = $request->get('tax_amount');
         $discount           = $request->get('discount');
         $deductedTotal      = $request->get('deducted_total');
+        $oldBalance         = $request->get('old_balance');
+        $totalAmount        = $request->get('total_amount');
+        $payment            = $request->get('payment');
+        $balance            = $request->get('balance');
 
         $salesAccount = Account::where('account_name','Sales')->first();
         if($salesAccount) {
@@ -65,14 +63,17 @@ class SaleController extends Controller
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Try again after reloading the page!<small class='pull-right'> #06/02</small>")->with("alert-class","alert-danger");
         }
 
-        $totalBill  = SaleDetailTemp::where('status', 1)->sum('total');
+        $totalBill  = SaleDetailTemp::where('status', 1)->where('account_id', $customerAccountId)->sum('total');
         if(empty($totalBill) || $totalBill == 0) {
-            return redirect()->back()->withInput()->with("message","Failed to save the sale details. Minimum one product should be added to the bill!<small class='pull-right'> #06/03</small>")->with("alert-class","alert-danger");
+            $customError = ['product' => 'Minimum one product should be added to the bill!'];
+            return redirect()->back()->withInput()->withErrors($customError);
+            //flash message
+            //->with("message","Failed to save the sale details. Minimum one product should be added to the bill!<small class='pull-right'> #06/03</small>")->with("alert-class","alert-danger")
         }
         if($billAmount != $totalBill) {
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Calculation Error. Try again after reloading the page!<small class='pull-right'> #06/03</small>")->with("alert-class","alert-danger");
         }
-        if(($billAmount + $taxAmount - $discount) != $deductedTotal) {
+        if(($billAmount + $taxAmount - $discount) != $deductedTotal && ($deductedTotal + $oldBalance - $payment != $balance)) {
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Calculation Error. Try again after reloading the page!<small class='pull-right'> #06/04</small>")->with("alert-class","alert-danger");
         }
 
@@ -168,21 +169,24 @@ class SaleController extends Controller
             ]);
     }
 
-    public function addSaleDetail(Request $request) {
+    public function addSaleDetail(Request $request)
+    {
+        $accountId  = $request->get('account_id');
         $productId  = $request->get('product_id');
         $quantity   = $request->get('quantity');
         $rate       = $request->get('rate');
         $total      = $request->get('total');
 
         $saleDetailTemp = new SaleDetailTemp();
+        $saleDetailTemp->account_id = $accountId;
         $saleDetailTemp->product_id = $productId;
         $saleDetailTemp->quantity   = $quantity;
         $saleDetailTemp->rate       = $rate;
         $saleDetailTemp->total      = $total;
         $saleDetailTemp->status     = 1;
         if($saleDetailTemp->save()) {
-            $count      = SaleDetailTemp::where('status', 1)->count();
-            $totalBill  = SaleDetailTemp::where('status', 1)->sum('total');
+            $count      = SaleDetailTemp::where('status', 1)->where('account_id', $accountId)->count();
+            $totalBill  = SaleDetailTemp::where('status', 1)->where('account_id', $accountId)->sum('total');
             if(empty($count)) {
                 $count = 0;
             }
@@ -265,5 +269,30 @@ class SaleController extends Controller
         return view('sale.invoice',[
                 'sale'  => $sale,
             ]);
+    }
+
+    public function getSaleDetailByAccountId($accountId)
+    {
+        $saleDetailTemp = SaleDetailTemp::where('status', 1)->where('account_id', $accountId)/*->whereHas('account', function ($qry) {
+                    $qry->where('type', 3);
+                })*/->with(['product.measureUnit'])->get();
+        $totalBill      = SaleDetailTemp::where('status', 1)->where('account_id', $accountId)/*->whereHas('account', function ($qry) {
+                    $qry->where('type', 3);
+                })*/->sum('total');
+
+        $totalDebit     = Transaction::where('debit_account_id', $accountId)->whereHas('debitAccount', function ($qry) {
+                    $qry->where('type', 3);
+                })->sum('amount');
+        $totalCredit    = Transaction::where('credit_account_id', $accountId)->whereHas('creditAccount', function ($qry) {
+                    $qry->where('type', 3);
+                })->sum('amount');
+
+        return([
+            'flag'              => true,
+            'totalDebit'        => $totalDebit,
+            'totalCredit'       => $totalCredit,
+            'saleDetailTemp'    => $saleDetailTemp->toJson(),
+            'totalBill'         => $totalBill
+        ]);
     }
 }

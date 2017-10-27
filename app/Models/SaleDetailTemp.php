@@ -16,4 +16,12 @@ class SaleDetailTemp extends Model
     {
         return $this->belongsTo('App\Models\Product', 'product_id');
     }
+
+    /**
+     * Get the account details associated with the sale
+     */
+    public function account()
+    {
+        return $this->belongsTo('App\Models\Account','account_id');
+    }
 }

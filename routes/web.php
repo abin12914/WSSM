@@ -71,6 +71,7 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::post('/sale/detail/add', 'SaleController@addSaleDetail')->name('sale-deatail-add');
         Route::post('/sale/detail/delete', 'SaleController@deleteSaleDetail')->name('sale-deatail-delete');
         Route::get('/sale/view/invoice/{id}', 'SaleController@viewInvoice')->name('sale-invoice');
+        Route::get('/sale/detail/by/account/{id}', 'SaleController@getSaleDetailByAccountId')->name('sale-detail-by-accountId');
 
         //purchases
         Route::get('/purchase/register', 'PurchaseController@register')->name('purchase-register');

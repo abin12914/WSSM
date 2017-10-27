@@ -21,7 +21,7 @@
                 </h4>
             </div>
         @endif
-        @if (count($errors) > 0)
+        {{-- @if (count($errors) > 0)
             <div class="alert alert-danger" id="alert-message">
                 <ul>
                     @foreach($errors->all() as $error)
@@ -29,7 +29,7 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
         <!-- Main row -->
         <!-- form start -->
         <form action="{{route('sale-register-action')}}" id="credit_sale_form" method="post" class="form-horizontal">
@@ -37,8 +37,8 @@
                 <div class="col-md-12">
                     <div class="box">
                         <div class="box-body">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10">
                                 <input type="hidden" name="_token" id="csrf_token_value" value="{{csrf_token()}}">
                                 <div class="row"><br>
                                     <div class="col-md-11">
@@ -106,6 +106,9 @@
                                                 <option value="{{ $product->id }}" data-unit="{{ $product->measureUnit->name }}">{{ $product->name }}</option>
                                             @endforeach
                                         </select>
+                                        @if(!empty($errors->first('product')))
+                                            <p style="color: red;" >{{$errors->first('product')}}</p>
+                                        @endif
                                     </div>
                                     <div class="col-sm-2">
                                         <label for="quantity_main" class="control-label"><b style="color: red;">* </b> Quantity : </label>
@@ -141,12 +144,12 @@
                                         <th style="width: 15%">Quantity</th>
                                         <th style="width: 10%">Unit</th>
                                         <th style="width: 15%">Unit Price</th>
-                                        <th style="width: 26%">Total</th>
+                                        <th style="width: 26%">Amount</th>
                                         <th class="no-print" style="width: 2%">#</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bill_body">
-                                    @foreach($saleDetailTemp as $index => $detail)
+                                    {{-- @foreach($saleDetailTemp as $index => $detail)
                                         <tr id="product_row_'{{ $detail->id }}'">
                                             <td>{{ $index+1 }}</td>
                                             <td id="td_product_id_'{{ $index+1 }}'">
@@ -169,7 +172,7 @@
                                                 </button>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach --}}
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -180,8 +183,8 @@
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                        <td><b>Total Bill</b></td>
-                                        <td><input name="bill_amount" id="bill_amount" type="text" readonly class="form-control no-print" value="{{ $totalBill }}" style="width: 100%; height: 35px;"></td>
+                                        <td><b>Sub Total</b></td>
+                                        <td><input name="bill_amount" id="bill_amount" type="text" readonly class="form-control no-print" value="0" style="width: 100%; height: 35px;"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
                                     <tr>
@@ -189,7 +192,7 @@
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                        <td><b>Tax</b></td>
+                                        <td><b>Tax Amount</b></td>
                                         <td><input name="tax_amount" id="tax_amount" type="text" class="form-control no-print" value="0" readonly style="width: 100%; height: 35px;"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
@@ -199,7 +202,7 @@
                                         <td></td>
                                         <td></td>
                                         <td><b>Discount</b></td>
-                                        <td><input name="discount" id="discount" type="text" class="form-control no-print" value="0" style="width: 100%; height: 35px;"></td>
+                                        <td><input name="discount" id="discount" type="text" class="form-control no-print decimal_number_only" value="0" style="width: 100%; height: 35px;" maxlength="10"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
                                     <tr>
@@ -207,8 +210,53 @@
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                        <td><b>Total</b></td>
-                                        <td><input name="deducted_total" id="deducted_total" type="text" class="form-control no-print" value="{{ $totalBill }}" readonly style="width: 100%; height: 35px;"></td>
+                                        <td><b>Total Bill</b></td>
+                                        <td><input name="deducted_total" id="deducted_total" type="text" class="form-control no-print" value="0" readonly style="width: 100%; height: 35px;"></td>
+                                        <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td id="old_balance_label"><b style="color: red;">Previous Balance</b></td>
+                                        <td>
+                                            <b id="old_balance_amount" class="form-control no-print" style="width: 100%; height: 35px;" readonly>0</b>
+                                            <input name="old_balance" id="old_balance" type="hidden" value="0">
+                                        </td>
+                                        <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td id="total_amount_label"><b style="color: red;">Outstanding Amount[Balance]</b></td>
+                                        <td>
+                                            <b id="total_amount_display" class="form-control no-print" style="width: 100%; height: 35px;" readonly>0</b>
+                                            <input name="total_amount" id="total_amount" type="hidden" value="0" readonly>
+                                        </td>
+                                        <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td><b>Payment</b></td>
+                                        <td><input name="payment" id="payment" type="text" class="form-control no-print decimal_number_only" value="0" style="width: 100%; height: 35px;" maxlength="10"></td>
+                                        <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td id="balance_label"><b style="color: red;">Balance</b></td>
+                                        <td>
+                                            <b id="balance_amount" class="form-control no-print" style="width: 100%; height: 35px;" readonly>0</b>
+                                            <input name="balance" id="balance" type="hidden" value="0">
+                                        </td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
                                 </tfoot>

@@ -58,7 +58,76 @@ $(function () {
         if(fieldValue) {
             $("#quantity_main").focus();
         }
-    })
+    });
+
+    $('body').on("change", "#customer_account_id", function () {
+        var accountId  = $(this).val();
+
+        if(accountId) {
+            $.ajax({
+                url: "/sale/detail/by/account/"+accountId,
+                method: "get",
+                success: function(result) {
+                    if(result && result.flag) {
+                        //clear existing products and details
+                        $("#bill_body").html('');
+                        $.each($.parseJSON(result.saleDetailTemp), function(index,detail) {
+                            var html = '<tr id="product_row_'+ (detail.id) + '">'+
+                                '<td>'+ (index+1) +'</td>'+
+                                '<td id="td_product_id_'+ (index+1) +'">'+
+                                    '<label class="form-control">'+ (detail.product.name) +'</label>'+
+                                '<td>'+
+                                    '<input name="quantity_'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.quantity) +'">'+
+                                '</td>'+
+                                '<td>'+
+                                    '<input id="measure_unit_'+ (index+1) +'" class="form-control" type="text" readonly style="width: 100%; height: 35px;" value="'+ (detail.product.measure_unit.name) +'">'+
+                                '</td>'+
+                                '<td>'+
+                                    '<input name="rate'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.rate) +'">'+
+                                '</td>'+
+                                '<td>'+
+                                    '<input name="sub_total'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.total) +'">'+
+                                '</td>'+
+                                '<td class="no-print">'+
+                                    '<button data-detail-id="'+ (detail.id) +'" id="remove_button_'+ (index + 1) +'" type="button" class="form-control remove_button">'+
+                                        '<i style="color: red;" class="fa fa-close"></i>'+
+                                    '</button>'+
+                                '</td>'+
+                            '</tr>';
+                            $("#bill_body").append(html);
+                        });
+                        oldBalance = (result.totalCredit - result.totalDebit) * 1;
+                        oldBalanceAmount = oldBalance;
+                        totalBill = result.totalBill;
+
+                        if(oldBalance < 0) {
+                            $('#old_balance_label').html('<b style="color: green;">Previous Adance</b>');
+                            oldBalanceAmount = oldBalance * -1;
+                        } else {
+                            $('#old_balance_label').html('<b style="color: red;">Previous Balance</b>');
+                        }
+
+                        $('#bill_amount').val(totalBill);
+                        $('#deducted_total').val(totalBill);
+                        $('#old_balance_amount').html(oldBalanceAmount);
+                        $('#old_balance').val(oldBalance);
+                        calculateTotalBill();
+                    } else {
+                        console.log("ajax request failed #5");
+                    }
+                },
+                error: function () {
+                    console.log("ajax request failed #6");
+                }
+            });
+        }
+    });
+
+    //the following code must be put unnder the above code.
+    var customerAccountId  = $('#customer_account_id').val();
+    if(customerAccountId) {
+        $('#customer_account_id').trigger('change');
+    }
 
     $('body').on("keydown", "#quantity_main", function (evt) {
         var charCode = (evt.which) ? evt.which : evt.keyCode;
@@ -112,8 +181,12 @@ $(function () {
         calculateTotalBill();
     });
 
+    $('body').on("keyup", "#payment", function (evt) {
+        calculateTotalBill();
+    });
+
     $('body').on("click", "#button_main", function (evt) {
-        calculateMainSubTotal();
+        var accountId   = $('#customer_account_id').val();
         var productId   = $('#product_id_main').val();
         var productName = $('#product_id_main option:selected').text();
         var quantity    = $('#quantity_main').val();
@@ -121,12 +194,17 @@ $(function () {
         var subTotal    = $('#sub_total_main').val();
         var subTotal    = $('#sub_total_main').val();
 
-        if(productId && quantity && rate) {
+        if(!accountId) {
+            alert("Select customer!");
+            return false;
+        }
+        if(accountId && productId && quantity && rate) {
             $.ajax({
                 url: "/sale/detail/add",
                 method: "post",
                 data: {
                     _token: token,
+                    account_id: accountId,
                     product_id: productId,
                     quantity: quantity,
                     rate: rate,
@@ -155,6 +233,8 @@ $(function () {
         $('#sub_total_main').val('');
         $('#product_id_main').trigger('change');
         $('#product_id_main').focus();
+
+        calculateMainSubTotal();
     });
 
     $('body').on("click", ".remove_button", function (evt) {
@@ -229,22 +309,58 @@ function calculateMainSubTotal() {
 }
 
 function calculateTotalBill() {
-    totalBill       = $('#bill_amount').val()
-    tax             = $('#tax_amount').val();
+    totalBill       = ($('#bill_amount').val() * 1);
+    tax             = ($('#tax_amount').val() * 1);
     discount        = $('#discount').val();
+    oldBalance      = ($('#old_balance').val() * 1);
+    payment         = $('#payment').val();
 
-    if(discount != 0 && discount.charAt(discount.length-1) != '.') {
-        //for removing the preceding zero
-        discount = discount * 1;
+    if(discount.length == 2 && discount.charAt(discount.length-1) == '.') {
+        //code for removing last '.'
+        discount = discount.slice(0,-1);
     }
+    //for removing the preceding zero
+    discount = discount * 1;
+
+    if(payment.length == 2 && payment.charAt(payment.length-1) == '.') {
+        //code for removing last '.'
+        payment = payment.slice(0,-1);
+    }
+    //for removing the preceding zero
+    payment = payment * 1;
+
     if(totalBill && totalBill >= 1 && totalBill > discount) {
         deductedTotal   = 0;
         deductedTotal  = (((totalBill * 1) + (tax * 1)) - discount);
-        $('#discount').val(discount);
     } else {
         deductedTotal  = (((totalBill * 1) + (tax * 1)));
-        $('#discount').val('0');        
+        $('#discount').val(0);
+    }
+
+    totalAmount = 0;
+    balance     = 0;
+    totalAmount = deductedTotal + oldBalance;
+    balance     = totalAmount - payment;
+    totalAmountDisplay  = totalAmount;
+    balanceAmount       = balance;
+
+    if(balance < 0) {
+        $('#balance_label').html('<b style="color: green;">Adance</b>');
+        balanceAmount = balance * -1;
+    } else {
+        $('#balance_label').html('<b style="color: red;">Balance</b>');
+    }
+
+    if(totalAmount < 0) {
+        $('#total_amount_label').html('<b style="color: green;">Outstanding Amount[Advance]</b>');
+        totalAmountDisplay = totalAmount * -1;
+    } else {
+        $('#total_amount_label').html('<b style="color: red;">Outstanding Amount[Balance]</b>');
     }
 
     $('#deducted_total').val(deductedTotal);
+    $('#total_amount').val(totalAmount);
+    $('#total_amount_display').html(totalAmountDisplay);
+    $('#balance').val(balance);
+    $('#balance_amount').html(balanceAmount);
 }
