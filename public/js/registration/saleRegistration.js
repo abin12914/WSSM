@@ -72,21 +72,21 @@ $(function () {
                         //clear existing products and details
                         $("#bill_body").html('');
                         $.each($.parseJSON(result.saleDetailTemp), function(index,detail) {
-                            var html = '<tr id="product_row_'+ (detail.id) + '">'+
-                                '<td>'+ (index+1) +'</td>'+
+                            var html = '<tr id="product_row_'+ (detail.id) + '" data-tempdetail-id="'+ (detail.id) +'">'+
+                                '<td class="serial_number">'+ (index+1) +'</td>'+
                                 '<td id="td_product_id_'+ (index+1) +'">'+
                                     '<label class="form-control">'+ (detail.product.name) +'</label>'+
                                 '<td>'+
-                                    '<input name="quantity_'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.quantity) +'">'+
+                                    '<input name="quantity_'+ (index+1) +'" class="form-control quantity" type="text" style="width: 100%; height: 35px;" value="'+ (detail.quantity) +'" data-default-quantity="'+ (detail.quantity) +'">'+
                                 '</td>'+
                                 '<td>'+
                                     '<input id="measure_unit_'+ (index+1) +'" class="form-control" type="text" readonly style="width: 100%; height: 35px;" value="'+ (detail.product.measure_unit.name) +'">'+
                                 '</td>'+
                                 '<td>'+
-                                    '<input name="rate'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.rate) +'">'+
+                                    '<input name="rate_'+ (index+1) +'" class="form-control rate" type="text" style="width: 100%; height: 35px;" value="'+ (detail.rate) +'" data-default-rate="'+ (detail.rate) +'">'+
                                 '</td>'+
                                 '<td>'+
-                                    '<input name="sub_total'+ (index+1) +'" class="form-control" type="text" style="width: 100%; height: 35px;" value="'+ (detail.total) +'">'+
+                                    '<input name="sub_total_'+ (index+1) +'" class="form-control sub_total" type="text" style="width: 100%; height: 35px;" value="'+ (detail.total) +'">'+
                                 '</td>'+
                                 '<td class="no-print">'+
                                     '<button data-detail-id="'+ (detail.id) +'" id="remove_button_'+ (index + 1) +'" type="button" class="form-control remove_button">'+
@@ -96,7 +96,7 @@ $(function () {
                             '</tr>';
                             $("#bill_body").append(html);
                         });
-                        oldBalance = (result.totalCredit - result.totalDebit) * 1;
+                        oldBalance = (result.totalDebit - result.totalCredit) * 1;
                         oldBalanceAmount = oldBalance;
                         totalBill = result.totalBill;
 
@@ -185,6 +185,15 @@ $(function () {
         calculateTotalBill();
     });
 
+    $('body').on("keydown", ".quantity", function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        var quantity  = $(this).val();
+
+        if(charCode == 13) {
+        
+        }
+    });
+
     $('body').on("click", "#button_main", function (evt) {
         var accountId   = $('#customer_account_id').val();
         var productId   = $('#product_id_main').val();
@@ -258,6 +267,9 @@ $(function () {
                         var deductedTotal = (($('#bill_amount').val() * 1) - (lessValue * 1));
                         $('#bill_amount').val(deductedTotal);
                         calculateTotalBill();
+                        $(".serial_number").each(function(i) {
+                            $(this).html(i+1);
+                        });
                     } else {
                         console.log("ajax request failed #3");
                     }
@@ -266,6 +278,114 @@ $(function () {
                     console.log("ajax request failed #4");
                 }
             });
+        }
+    });
+
+    $('body').on("keydown", ".rate", function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+
+        if(charCode == 13) {
+            evt.preventDefault();
+            var rate            = $(this).val();
+            var rateElement     = this;
+            var quantity        = $(this).parent().parent().find(".quantity").val();
+            var tempDetailId    =  $(this).parent().parent().data('tempdetail-id');
+
+            if(rate <= 0) {
+                $(this).addClass('has-error');
+                var defaultRate = $(this).data('default-rate');
+                $(this).val(defaultRate);
+                return false;
+            }
+            if(quantity <= 0) {
+                $(this).parent().parent().find(".quantity").addClass('has-error');
+                var defaultQuantity = $(this).parent().parent().find(".quantity").data('default-quantity');
+                $(this).parent().parent().find(".quantity").val(defaultQuantity);
+                return false;
+            }
+
+            var subTotal    = (rate * 1) * (quantity * 1);
+            $(this).parent().parent().find(".sub_total").val(subTotal);
+
+            if(tempDetailId) {
+                $.ajax({
+                    url: "/sale/detail/edit",
+                    method: "post",
+                    data: {
+                        _token: token,
+                        id: tempDetailId,
+                        rate: rate,
+                        elementFlag: 1,
+                    },
+                    success: function(result) {
+                        if(result && result.flag) {
+                            var totalBill = result.totalBill;
+                            $('#bill_amount').val(totalBill);
+                            $(rateElement).data('default-rate', result.defaultRate);
+                            calculateTotalBill();
+                        } else {
+                            console.log("ajax request failed #7");
+                        }
+                    },
+                    error: function () {
+                        console.log("ajax request failed #8");
+                    }
+                });
+            }
+        }
+    });
+
+    $('body').on("keydown", ".quantity", function (evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+
+        if(charCode == 13) {
+            evt.preventDefault();
+            var quantity        = $(this).val();
+            var quantityElement = this;
+            var rate            = $(this).parent().parent().find(".rate").val();
+            var tempDetailId    =  $(this).parent().parent().data('tempdetail-id');
+
+            if(rate <= 0) {
+                $(this).parent().parent().find(".rate").addClass('has-error');
+                var defaultRate = $(this).parent().parent().find(".rate").data('default-rate');
+                $(this).parent().parent().find(".rate").val(defaultRate);
+                return false;
+            }
+            if(quantity <= 0) {
+                $(this).addClass('has-error');
+                var defaultQuantity = $(this).data('default-quantity');
+                $(this).val(defaultQuantity);
+                return false;
+            }
+
+            var subTotal    = (rate * 1) * (quantity * 1);
+            $(this).parent().parent().find(".sub_total").val(subTotal);
+
+            if(tempDetailId) {
+                $.ajax({
+                    url: "/sale/detail/edit",
+                    method: "post",
+                    data: {
+                        _token: token,
+                        id: tempDetailId,
+                        quantity: quantity,
+                        elementFlag: 1,
+                    },
+                    success: function(result) {
+                        if(result && result.flag) {
+                            var totalBill = result.totalBill;
+                            $('#bill_amount').val(totalBill);
+                            $(quantityElement).data('default-quantity', result.defaultQuantity);
+                            calculateTotalBill();
+                        } else {
+                            console.log("ajax request failed #9");
+                        }
+                    },
+                    error: function () {
+                        console.log("ajax request failed #10");
+                    }
+                });
+            }
         }
     });
 });

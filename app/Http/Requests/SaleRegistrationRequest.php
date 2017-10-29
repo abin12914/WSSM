@@ -84,6 +84,30 @@ class SaleRegistrationRequest extends FormRequest
                                                 'max:999999',
                                                 'min:0'
                                             ],
+            'old_balance'               => [
+                                                'required',
+                                                'numeric',
+                                                'max:999999',
+                                                'min:-999999'
+                                            ],
+            'total_amount'              => [
+                                                'required',
+                                                'numeric',
+                                                'max:999999',
+                                                'min:-999999'
+                                            ],
+            'payment'                   => [
+                                                'required',
+                                                'numeric',
+                                                'max:999999',
+                                                'min:0'
+                                            ],
+            'balance'            => [
+                                                'required',
+                                                'numeric',
+                                                'max:999999',
+                                                'min:-999999'
+                                            ],
         ];
     }
 }

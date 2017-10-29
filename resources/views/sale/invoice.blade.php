@@ -29,7 +29,7 @@
             <div class="col-md-4"><H4 class="visible-print" style="text-align:center;">Ph : 08943091419, 09745307548</H4></div><div class="clearfix"></div>
             <div class="col-md-4"></div>
             <div class="col-md-4"><H4 class="visible-print" style="text-align:center;">SALE INVOICE</H4></div><div class="clearfix"></div>
-                <div class="box visible-print">
+                {{-- <div class="box visible-print">
                     <div class="box-body">
                         <div class="form-group visible-print">
                             <div class="col-sm-12">
@@ -41,20 +41,20 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div class="form-group {{ !empty($sale->transaction->particulars) ? 'visible-print' : 'no-print' }}">
+                        <div class="form-group {{ !empty($sale->transaction->particulars) ? 'visible-print' : 'no-print' }}">
                             <div class="col-sm-12">
                                 <label for="description" class="control-label">Description : </label>
                                 <label>{{ $sale->transaction->particulars }}</label>
                             </div>
-                        </div> --}}
+                        </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="box">
                     <div class="box-body">
                         <div class="row"><br>
                             <div class="col-md-1"></div>
                             <div class="col-md-10">
-                                <div class="form-group no-print">
+                                {{-- <div class="form-group no-print">
                                     <div class="col-sm-6">
                                         <label for="date_credit" class="control-label">Invoice No & Date : </label>
                                         <label class="form-control">{{ $sale->id }} / {{ Carbon\Carbon::parse($sale->transaction->date_time)->format('d-m-Y') }}</label>
@@ -69,7 +69,28 @@
                                         <label for="description" class="control-label">Description : </label>
                                         <label class="form-control">{{ $sale->transaction->particulars }}</label>
                                     </div>
-                                </div>
+                                </div> --}}
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <td style="width: 50%">
+                                                <label for="date_credit" class="control-label">Invoice No & Date : </label>
+                                                <label class="form-control">{{ $sale->id }} / {{ Carbon\Carbon::parse($sale->transaction->date_time)->format('d-m-Y') }}</label>
+                                            </td>
+                                            <td style="width: 50%">
+                                                <label for="supplier_account_id" class="control-label">Customer : </label>
+                                                <label class="form-control">{{ $sale->transaction->debitAccount->account_name }}</label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 50%">
+                                                <label for="description" class="control-label">Description : </label>
+                                                <label class="form-control">{{ $sale->transaction->particulars }}</label>
+                                            </td>
+                                            <td style="width: 50%"></td>
+                                        </tr>
+                                    </thead>
+                                </table>
                                 <div class="clearfix"></div><br>
                                 <table class="table table-bordered table-hover">
                                     <thead>

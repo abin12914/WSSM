@@ -70,6 +70,7 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::get('/sale/list', 'SaleController@list')->name('sale-list');
         Route::post('/sale/detail/add', 'SaleController@addSaleDetail')->name('sale-deatail-add');
         Route::post('/sale/detail/delete', 'SaleController@deleteSaleDetail')->name('sale-deatail-delete');
+        Route::post('/sale/detail/edit', 'SaleController@editSaleDetail')->name('sale-deatail-edit');
         Route::get('/sale/view/invoice/{id}', 'SaleController@viewInvoice')->name('sale-invoice');
         Route::get('/sale/detail/by/account/{id}', 'SaleController@getSaleDetailByAccountId')->name('sale-detail-by-accountId');
 
@@ -78,7 +79,7 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::post('/purchase/register/action', 'PurchaseController@registerAction')->name('purchase-register-action');
         Route::get('/purchase/list', 'PurchaseController@list')->name('purchase-list');
         Route::post('/purchase/detail/add', 'PurchaseController@addPurchaseDetail')->name('purchase-deatail-add');
-        Route::post('/purchase/detail/delete', 'PurchaseController@deletePurchaseDetail')->name('purchase-deatail-delete');
+        Route::post('/purchase/detail/delete', 'PurchaseController@deletePurchaseDetail')->name('purchase-deatail-delete');        
         Route::get('/purchase/view/invoice/{id}', 'PurchaseController@viewInvoice')->name('purchase-invoice');
 
         //product category
