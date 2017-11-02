@@ -29,48 +29,12 @@
             <div class="col-md-4"><H4 class="visible-print" style="text-align:center;">Ph : 08943091419, 09745307548</H4></div><div class="clearfix"></div>
             <div class="col-md-4"></div>
             <div class="col-md-4"><H4 class="visible-print" style="text-align:center;">SALE INVOICE</H4></div><div class="clearfix"></div>
-                {{-- <div class="box visible-print">
-                    <div class="box-body">
-                        <div class="form-group visible-print">
-                            <div class="col-sm-12">
-                                <label for="date_credit" class="control-label">Invoice No & Date : </label>
-                                <label><p>{{ $sale->id }} / {{ Carbon\Carbon::parse($sale->transaction->date_time)->format('d-m-Y') }}</p></label>
-                                <div class="pull-right">
-                                    <label for="supplier_account_id" class="control-label">Customer : </label>
-                                    <label><p>{{ $sale->transaction->debitAccount->account_name }}</p></label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group {{ !empty($sale->transaction->particulars) ? 'visible-print' : 'no-print' }}">
-                            <div class="col-sm-12">
-                                <label for="description" class="control-label">Description : </label>
-                                <label>{{ $sale->transaction->particulars }}</label>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
                 <div class="box">
                     <div class="box-body">
-                        <div class="row"><br>
+                        <div class="row">
                             <div class="col-md-1"></div>
                             <div class="col-md-10">
-                                {{-- <div class="form-group no-print">
-                                    <div class="col-sm-6">
-                                        <label for="date_credit" class="control-label">Invoice No & Date : </label>
-                                        <label class="form-control">{{ $sale->id }} / {{ Carbon\Carbon::parse($sale->transaction->date_time)->format('d-m-Y') }}</label>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label for="supplier_account_id" class="control-label">Customer : </label>
-                                        <label class="form-control">{{ $sale->transaction->debitAccount->account_name }}</label>
-                                    </div>
-                                </div>
-                                <div class="form-group {{ empty($sale->description) ? 'no-print' : '' }}">
-                                    <div class="col-sm-12">
-                                        <label for="description" class="control-label">Description : </label>
-                                        <label class="form-control">{{ $sale->transaction->particulars }}</label>
-                                    </div>
-                                </div> --}}
-                                <table class="table table-bordered table-hover">
+                                <table class="table">
                                     <thead>
                                         <tr>
                                             <td style="width: 50%">
@@ -85,9 +49,12 @@
                                         <tr>
                                             <td style="width: 50%">
                                                 <label for="description" class="control-label">Description : </label>
-                                                <label class="form-control">{{ $sale->transaction->particulars }}</label>
+                                                <textarea class="form-control" rows="2" style="resize: none;">{{ $sale->transaction->particulars }}</textarea>
                                             </td>
-                                            <td style="width: 50%"></td>
+                                            <td style="width: 50%">
+                                                <label for="description" class="control-label">Address : </label>
+                                                <textarea class="form-control" rows="2" style="resize: none;">{{ $sale->transaction->debitAccount->accountDetail->address }}</textarea>
+                                            </td>
                                         </tr>
                                     </thead>
                                 </table>
@@ -131,36 +98,120 @@
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            @if($accountId != 1)
+                                                @if($oldBalance < 0)
+                                                    <td><b>Previous Advance</b></td>
+                                                    <td>{{ $oldBalance * -1 }}</td>
+                                                @else
+                                                    <td><b>Previous Balance</b></td>
+                                                    <td>{{ $oldBalance }}</td>
+                                                @endif
+                                            @else
+                                                <td></td>
+                                                <td></td>
+                                            @endif
                                             <td></td>
                                             <td><b>Total Bill</b></td>
                                             <td>{{ $sale->bill_amount }}</td>
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            @if($accountId != 1)
+                                                @if(($oldBalance + $sale->total) < (0))
+                                                    <td><b>Outstanding Amount[Advance]</b></td>
+                                                    <td>{{ ($oldBalance * -1) + $sale->total }}</td>
+                                                @else
+                                                    <td><b>Outstanding Amount[Balance]</b></td>
+                                                    <td>{{ $oldBalance + $sale->total }}</td>
+                                                @endif
+                                            @else
+                                                <td></td>
+                                                <td></td>
+                                            @endif
                                             <td></td>
                                             <td><b>Tax</b></td>
                                             <td>{{ $sale->tax_amount }}</td>
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            @if($accountId != 1)
+                                                <td><b>Payment</b></td>
+                                                <td>{{ !empty($paymentAmount) ? $paymentAmount : 0 }}</td>
+                                            @else
+                                                <td></td>
+                                                <td></td>
+                                            @endif
                                             <td></td>
                                             <td><b>Discount</b></td>
                                             <td>{{ $sale->discount }}</td>
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            @if($accountId != 1)
+                                                @if($totalDebit - $totalCredit)
+                                                    <td style="color: red"><b>Balance</b></td>
+                                                    <td><u style="color: red">{{ $totalDebit - $totalCredit }}</u></td>
+                                                @else
+                                                    <td><b style="color: green">Advance</b></td>
+                                                    <td><u style="color: green">{{ $totalDebit - $totalCredit }}</u></td>
+                                                @endif
+                                            @else
+                                                <td></td>
+                                                <td></td>
+                                            @endif
                                             <td></td>
                                             <td><b>Total</b></td>
                                             <td>{{ $sale->total }}</td>
                                         </tr>
+                                        @if(0 == 1){{-- ($accountId != 1) --}}
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                @if($oldBalance < 0)
+                                                    <td><b>Previous Advance</b></td>
+                                                    <td>{{ $oldBalance * -1 }}</td>
+                                                @else
+                                                    <td><b>Previous Balance</b></td>
+                                                    <td>{{ $oldBalance }}</td>
+                                                @endif
+                                            </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            @if(($oldBalance + $sale->total) < (0))
+                                                <td><b>Outstanding Amount[Advance]</b></td>
+                                                <td>{{ ($oldBalance * -1) + $sale->total }}</td>
+                                            @else
+                                                <td><b>Outstanding Amount[Balance]</b></td>
+                                                <td>{{ $oldBalance + $sale->total }}</td>
+                                            @endif
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td><b>Payment</b></td>
+                                            <td>{{ !empty($paymentAmount) ? $paymentAmount : 0 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            @if($totalDebit - $totalCredit)
+                                                <td><b>Balance</b></td>
+                                                <td><u style="color: red">{{ $totalDebit - $totalCredit }}</u></td>
+                                            @else
+                                                <td><b>Advance</b></td>
+                                                <td><u style="color: red">{{ $totalDebit - $totalCredit }}</u></td>
+                                            @endif
+                                        </tr>
+                                    @endif
                                     </tfoot>
                                 </table>
                                 <div class="col-md-4"></div>

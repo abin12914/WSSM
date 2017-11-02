@@ -59,7 +59,12 @@ class SaleController extends Controller
 
         $customerRecord = Account::find($customerAccountId);
         if($customerRecord && !empty($customerRecord->id)) {
-            $customer = $customerRecord->account_name;
+            $customer       = $customerRecord->account_name;
+            if($customerAccountId  == 1) {
+                $description = $description. "[Cash Sale]";
+            } else {
+                $description    = $description. "[Credit sale to " .$customer. "]";
+            }
         } else {
             return redirect()->back()->withInput()->with("message","Failed to save the sale details. Try again after reloading the page!<small class='pull-right'> #06/02</small>")->with("alert-class","alert-danger");
         }
@@ -86,7 +91,7 @@ class SaleController extends Controller
         $transaction->credit_account_id = $salesAccountId; //sales account
         $transaction->amount            = !empty($deductedTotal) ? $deductedTotal : '0';
         $transaction->date_time         = $dateTime;
-        $transaction->particulars       = ($description. "[Sale to/by " .$customer. "]");
+        $transaction->particulars       = $description;
         $transaction->status            = 1;
         $transaction->created_by        = Auth::user()->id;
         if($transaction->save()) {
@@ -156,7 +161,11 @@ class SaleController extends Controller
         } else {
             return 3;
         }
-        $description = ("Payment recieved from ". $customer ." with ". $dateTime ." sale [#". $saleId ."]");
+        if($customerAccountId == 1){
+            $description = ("Payment recieved from ". $customer ." with ". $dateTime ." sale [#". $saleId ."]");
+        } else {
+            $description = ("Payment recieved for ". $dateTime ." Cash sale [#". $saleId ."]");
+        }
 
         $paymentTransaction = new Transaction;
         $paymentTransaction->debit_account_id   = $cashAccountId;
@@ -168,12 +177,14 @@ class SaleController extends Controller
         $paymentTransaction->created_by         = Auth::user()->id;
         if($paymentTransaction->save()) {
             $voucher = new Voucher;
-            $voucher->voucher_type     = 1;
-            $voucher->transaction_type = 1; //cash debit
-            $voucher->amount           = $payment;
-            $voucher->description      = $description;
-            $voucher->transaction_id   = $paymentTransaction->id;
-            $voucher->status           = 1;
+            $voucher->voucher_type      = 1;
+            $voucher->transaction_type  = 1; //cash debit
+            $voucher->amount            = $payment;
+            $voucher->description       = $description;
+            $voucher->transaction_id    = $paymentTransaction->id;
+            $voucher->reference         = 1;
+            $voucher->reference_id      = $saleId;
+            $voucher->status            = 1;
             
             if($voucher->save()) {
                 return 1;
@@ -354,14 +365,37 @@ class SaleController extends Controller
         }
     }
 
-    public function viewInvoice($invoiceId) {
+    public function viewInvoice($invoiceId)
+    {
+        $accountId          = 0;
+        $currentBillAmount  = 0;
+        $paymentAmount      = 0;
+        $oldBalance         = 0;
         $sale = Sale::where('id', $invoiceId)->where('status', 1)->first();
 
         if(empty($sale)) {
             return redirect()->back()->withInput()->with("message","Invoice not found. Try again after reloading the page!<small class='pull-right'> #13/01</small>")->with("alert-class","alert-danger");
+        } else {
+            $accountId          = $sale->transaction->debit_account_id;
+            $currentBillAmount  = $sale->total;
+            $voucherPayment = Voucher::where('status', 1)->where('reference', 1)->where('reference_id', $sale->id)->first();
+            if(!empty($voucherPayment)) {
+                $paymentAmount = $voucherPayment->amount;
+            }
         }
+
+        $totalDebit     = Transaction::where('debit_account_id', $accountId)->sum('amount');
+        $totalCredit    = Transaction::where('credit_account_id', $accountId)->sum('amount');
+
+        $oldBalance = (($totalDebit - $currentBillAmount) - ($totalCredit + $paymentAmount));
+
         return view('sale.invoice',[
-                'sale'  => $sale,
+                'sale'          => $sale,
+                'accountId'     => $accountId,
+                'totalDebit'    => $totalDebit,
+                'totalCredit'   => $totalCredit,
+                'oldBalance'    => $oldBalance,
+                'paymentAmount' => $paymentAmount
             ]);
     }
 

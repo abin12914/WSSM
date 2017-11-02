@@ -106,7 +106,7 @@
                                                 <tr>
                                                     <td>{{ $index + $sales->firstItem() }}</td>
                                                     <td>{{ $sale->transaction->date_time }}</td>
-                                                    <td>{{ $sale->transaction->creditAccount->account_name }}</td>
+                                                    <td>{{ $sale->transaction->debitAccount->account_name }}</td>
                                                     <td>{{ $sale->transaction->particulars }}</td>
                                                     <td>{{ $sale->total }}</td>
                                                     <td><a href="{{ route('sale-invoice', [$sale->id]) }}">View Bill</a></td>

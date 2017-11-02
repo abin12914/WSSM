@@ -91,24 +91,24 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="col-lg-6 {{ !empty($errors->first('cash_voucher_type')) ? 'has-error' : '' }}">
-                                                        <label for="cash_voucher_type_debit" class="control-label">Income : </label>
+                                                        <label for="cash_voucher_type_debit" class="control-label">Debit : </label>
                                                         <div class="input-group">
                                                             <span class="input-group-addon">
                                                                 <input type="radio" name="cash_voucher_type" id="cash_voucher_type_debit" value="1" {{ empty(old('cash_voucher_type')) || old('cash_voucher_type') == '1' ? 'checked' : ''}}>
                                                             </span>
-                                                            <label for="cash_voucher_type_debit" class="form-control">Debit</label>
+                                                            <label for="cash_voucher_type_debit" class="form-control">Income</label>
                                                         </div>
                                                         @if(!empty($errors->first('cash_voucher_type')))
                                                             <p style="color: red;" >{{$errors->first('cash_voucher_type')}}</p>
                                                         @endif
                                                     </div>
                                                     <div class="col-lg-6 {{ !empty($errors->first('cash_voucher_type')) ? 'has-error' : '' }}">
-                                                        <label for="cash_voucher_type_debit" class="control-label">Expense : </label>
+                                                        <label for="cash_voucher_type_debit" class="control-label">Credit : </label>
                                                         <div class="input-group">
                                                             <span class="input-group-addon">
                                                                 <input type="radio" name="cash_voucher_type" id="cash_voucher_type_credit" value="2" {{ old('cash_voucher_type') == '2' ? 'checked' : ''}}>
                                                             </span>
-                                                            <label for="cash_voucher_type_credit" class="form-control">Credit</label>
+                                                            <label for="cash_voucher_type_credit" class="form-control">Expense</label>
                                                         </div>
                                                     </div>
                                                 </div>

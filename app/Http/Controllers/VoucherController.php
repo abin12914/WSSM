@@ -20,8 +20,8 @@ class VoucherController extends Controller
     {
         $today = Carbon::now('Asia/Kolkata');
         
-        $cashVouchers   = Voucher::where('voucher_type','Cash')->with(['transaction.creditAccount'])->orderBy('created_at', 'desc')->take(5)->get();
-        $accounts       = Account::where('type','personal')->get();
+        $cashVouchers   = Voucher::where('voucher_type', 1)->with(['transaction.creditAccount'])->orderBy('created_at', 'desc')->take(5)->get();
+        $accounts       = Account::where('type', 3)->get();
 
         return view('voucher.register',[
                 'today' => $today,

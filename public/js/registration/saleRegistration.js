@@ -120,6 +120,13 @@ $(function () {
                     console.log("ajax request failed #6");
                 }
             });
+            if(accountId == 1) {
+                console.log('x');
+                $('.ob_payment_block').hide();
+            } else {
+                console.log('y');
+                $('.ob_payment_block').show();
+            }
         }
     });
 

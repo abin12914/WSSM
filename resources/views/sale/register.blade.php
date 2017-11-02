@@ -21,15 +21,6 @@
                 </h4>
             </div>
         @endif
-        {{-- @if (count($errors) > 0)
-            <div class="alert alert-danger" id="alert-message">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif --}}
         <!-- Main row -->
         <!-- form start -->
         <form action="{{route('sale-register-action')}}" id="credit_sale_form" method="post" class="form-horizontal">
@@ -149,30 +140,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="bill_body">
-                                    {{-- @foreach($saleDetailTemp as $index => $detail)
-                                        <tr id="product_row_'{{ $detail->id }}'">
-                                            <td>{{ $index+1 }}</td>
-                                            <td id="td_product_id_'{{ $index+1 }}'">
-                                                <label class="form-control">{{ $detail->product->name }}</label>
-                                            <td>
-                                                <input name="quantity_'{{ $index+1 }}'" class="form-control" type="text" style="width: 100%; height: 35px;" value="{{ $detail->quantity }}">
-                                            </td>
-                                            <td>
-                                                <input id="measure_unit_'{{ $index+1 }}'" class="form-control" type="text" readonly style="width: 100%; height: 35px;" value="{{ $detail->product->measureUnit->name }}">
-                                            </td>
-                                            <td>
-                                                <input name="rate'{{ $index+1 }}'" class="form-control" type="text" style="width: 100%; height: 35px;" value="{{ $detail->rate }}">
-                                            </td>
-                                            <td>
-                                                <input name="sub_total'{{ $index+1 }}'" class="form-control" type="text" style="width: 100%; height: 35px;" value="{{ $detail->total }}">
-                                            </td>
-                                            <td class="no-print">
-                                                <button data-detail-id="{{ $detail->id }}" id="remove_button_{{ $index + 1 }}" type="button" class="form-control remove_button">
-                                                    <i style="color: red;" class="fa fa-close"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach --}}
+                                <!-- Bill items-->
                                 </tbody>
                                 <tfoot>
                                     <tr>
@@ -214,7 +182,7 @@
                                         <td><input name="deducted_total" id="deducted_total" type="text" class="form-control no-print" value="0" readonly style="width: 100%; height: 35px;"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
-                                    <tr>
+                                    <tr class="ob_payment_block">
                                         <td></td>
                                         <td></td>
                                         <td></td>
@@ -226,7 +194,7 @@
                                         </td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
-                                    <tr>
+                                    <tr class="ob_payment_block">
                                         <td></td>
                                         <td></td>
                                         <td></td>
@@ -238,7 +206,7 @@
                                         </td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
-                                    <tr>
+                                    <tr class="ob_payment_block">
                                         <td></td>
                                         <td></td>
                                         <td></td>
@@ -247,7 +215,7 @@
                                         <td><input name="payment" id="payment" type="text" class="form-control no-print decimal_number_only" value="0" style="width: 100%; height: 35px;" maxlength="10"></td>
                                         <td class="no-print"><i style="color: blue;" class="fa  fa-flag-o"></i></td>
                                     </tr>
-                                    <tr>
+                                    <tr class="ob_payment_block">
                                         <td></td>
                                         <td></td>
                                         <td></td>
