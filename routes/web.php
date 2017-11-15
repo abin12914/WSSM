@@ -55,6 +55,7 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::get('/account/register', 'AccountController@register')->name('account-register');
         Route::post('/account/register/action', 'AccountController@registerAction')->name('account-register-action');
         Route::get('/account/list', 'AccountController@list')->name('account-list');
+        Route::get('/account/detail/by/account/{id}', 'AccountController@getAccountDetailByAccountId')->name('account-detail-by-accountId');
 
         //staff
         Route::get('/hr/employee/register', 'EmployeeController@register')->name('employee-register');

@@ -59,11 +59,11 @@ class VoucherController extends Controller
         if($voucherTransactionType == 1) {
             $debitAccountId     = $cashAccountId;
             $creditAccountId    = $accountId;
-            $particulars        = $description." :(Cash recieved from ".$name.")";
+            $particulars        = $description." :[Cash recieved from ".$name."]";
         } else {
             $debitAccountId     = $accountId;
             $creditAccountId    = $cashAccountId;
-            $particulars        = $description." :(Cash paid to ".$name.")";
+            $particulars        = $description." :[Cash paid to ".$name."]";
         }
 
         //converting date and time to sql datetime format
@@ -76,11 +76,10 @@ class VoucherController extends Controller
         $transaction->date_time         = $dateTime;
         $transaction->particulars       = $particulars;
         $transaction->status            = 1;
-        $transaction->created_user_id   = Auth::user()->id;
+        $transaction->created_by        = Auth::user()->id;
         if($transaction->save()) {
             $voucher = new Voucher;
-            $voucher->date_time        = $dateTime;
-            $voucher->voucher_type     = 'Cash';
+            $voucher->voucher_type     = 1;
             $voucher->transaction_type = $voucherTransactionType;
             $voucher->amount           = $voucherAmount;
             $voucher->description      = $description;

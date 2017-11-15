@@ -121,10 +121,8 @@ $(function () {
                 }
             });
             if(accountId == 1) {
-                console.log('x');
                 $('.ob_payment_block').hide();
             } else {
-                console.log('y');
                 $('.ob_payment_block').show();
             }
         }

@@ -72,7 +72,7 @@
                                                 <div class="form-group">
                                                     <div class="col-sm-6 {{ !empty($errors->first('cash_voucher_account_id')) ? 'has-error' : '' }}">
                                                         <label for="cash_voucher_account_id" class="control-label"><b style="color: red;">*</b> Account : </label>
-                                                        <select class="form-control account_select" name="cash_voucher_account_id" id="cash_voucher_account_id" tabindex="3" style="width: 100%">
+                                                        <select class="form-control" name="cash_voucher_account_id" id="cash_voucher_account_id" tabindex="3" style="width: 100%">
                                                             @if(!empty($accounts) && count($accounts) > 0)
                                                                 <option value="">Select account</option>
                                                                 @foreach($accounts as $account)
@@ -157,8 +157,8 @@
                                                 <th>Date & Time</th>
                                                 <th>Account Name</th>
                                                 <th>Name</th>
-                                                <th>Transaction Type</th>
-                                                <th>Amount</th>
+                                                <th>Debit</th>
+                                                <th>Credit</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -166,21 +166,25 @@
                                                 @foreach($cashVouchers as $index => $cashVoucher)
                                                     <tr>
                                                         <td>{{ $index+1 }}</td>
-                                                        <td>{{ $cashVoucher->date_time }}</td>
+                                                        <td>{{ $cashVoucher->transaction->  date_time }}</td>
                                                         {{-- <td>{{ $cashVoucher->transaction->creditAccount->account_name }}</td>
                                                         <td>{{ $cashVoucher->transaction->creditAccount->accountDetail->name }}</td> --}}
                                                          @if($cashVoucher->transaction_type == 1)
                                                             <td>{{ $cashVoucher->transaction->creditAccount->account_name }}</td>
                                                             <td>{{ $cashVoucher->transaction->creditAccount->accountDetail->name }}</td>
+                                                            <td>{{ $cashVoucher->amount }}</td>
+                                                            <td></td>
                                                         @elseif($cashVoucher->transaction_type == 2)
                                                             <td>{{ $cashVoucher->transaction->debitAccount->account_name }}</td>
                                                             <td>{{ $cashVoucher->transaction->debitAccount->accountDetail->name }}</td>
+                                                            <td></td>
+                                                            <td>{{ $cashVoucher->amount }}</td>
                                                         @else
                                                             <td></td>
                                                             <td></td>
+                                                            <td></td>
+                                                            <td></td>
                                                         @endif
-                                                        <td>{{ ($cashVoucher->transaction_type == 1) ? 'Debit' : 'Credit' }}</td>
-                                                        <td>{{ $cashVoucher->amount }}</td>
                                                     </tr>
                                                 @endforeach
                                             @endif

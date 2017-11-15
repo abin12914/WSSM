@@ -151,4 +151,22 @@ class AccountController extends Controller
                 'type'              => $type
             ]);
     }
+
+    /**
+     * Return account name for given account id
+     */
+    public function getAccountDetailByAccountId($accountId)
+    {
+        $account = Account::where('id', $accountId)->first();
+        if(!empty($account) && !empty($account->id)) {
+            return ([
+                    'flag' => true,
+                    'name' => $account->accountDetail->name,
+                ]);
+        } else {
+            return ([
+                    'flag'      => false
+                ]);            
+        }
+    }
 }
